@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0e14">
+  <title>TUFANCODEX — Free Fire Services</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+  <style>
+    :root{
+      --bg:#0b0e14; --panel:#111722; --panel2:#151c29;
+      --orange:#ff8c00; --red:#ff3c00; --green:#00ff88;
+      --muted:#8e99aa; --text:#f5f7fb; --line:rgba(255,255,255,.09);
+      --shadow:0 18px 55px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Poppins,system-ui,sans-serif}
+    body{
+      background:
+        radial-gradient(circle at 15% 5%,rgba(255,60,0,.14),transparent 28%),
+        radial-gradient(circle at 85% 10%,rgba(255,140,0,.12),transparent 25%),
+        var(--bg);
+    }
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .app{max-width:1050px;margin:auto;padding:16px 16px 45px}
+    .topbar{height:48px;display:flex;align-items:center}
+    .back-btn{
+      display:none;border:1px solid var(--line);background:#141a25;color:#fff;
+      width:42px;height:42px;border-radius:13px;box-shadow:var(--shadow)
+    }
+    .back-btn.show{display:grid;place-items:center}
+    .page{display:none;animation:pageIn .35s ease}
+    .page.active{display:block}
+    @keyframes pageIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+    .hero{
+      position:relative;overflow:hidden;margin-top:8px;padding:34px 24px;border:1px solid var(--line);
+      border-radius:28px;background:
+        linear-gradient(135deg,rgba(255,60,0,.18),rgba(255,140,0,.06) 48%,rgba(0,0,0,.1)),
+        var(--panel);box-shadow:var(--shadow)
+    }
+    .hero:after{content:"";position:absolute;width:260px;height:260px;right:-100px;top:-120px;border-radius:50%;background:rgba(255,60,0,.16);filter:blur(4px)}
+    .hero h1{position:relative;z-index:1;font-size:clamp(38px,9vw,72px);line-height:1;margin:0 0 12px;font-weight:800;letter-spacing:-2px}
+    .fire{display:inline-block;filter:drop-shadow(0 0 13px rgba(255,80,0,.7));animation:flicker .7s infinite alternate}
+    @keyframes flicker{to{transform:translateY(-3px) scale(1.06);filter:drop-shadow(0 0 24px rgba(255,140,0,.9))}}
+    .hero p{position:relative;z-index:1;color:#c5ccd7;margin:0 0 18px}
+    .badge{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.35);color:var(--green);font-size:12px;font-weight:700}
+
+    .section{margin-top:22px}
+    .section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .section-title h2{font-size:19px;margin:0}
+    .hint{font-size:11px;color:var(--muted)}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{border:1px solid var(--line);background:#101621;color:#b9c2d0;padding:8px 12px;border-radius:12px;font-size:12px;transition:.2s}
+    .chip.active,.chip:hover{border-color:var(--orange);color:#fff;background:rgba(255,140,0,.11)}
+
+    .search-wrap{display:flex;gap:10px;padding:10px;background:var(--panel);border:1px solid var(--line);border-radius:17px}
+    .search-wrap input{min-width:0;flex:1;background:transparent;border:0;outline:0;color:#fff;padding:7px 8px}
+    .search-wrap input::placeholder{color:#6f7a8b}
+    .btn{border:0;border-radius:13px;padding:12px 17px;color:#fff;font-weight:700;transition:.2s}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-fire{background:linear-gradient(135deg,var(--red),var(--orange));box-shadow:0 9px 28px rgba(255,60,0,.22)}
+    .btn-green{background:linear-gradient(135deg,#00b86b,var(--green));color:#06120d;box-shadow:0 9px 28px rgba(0,255,136,.16)}
+    .btn-dark{background:#1a2230;border:1px solid var(--line)}
+
+    .loading{display:none;align-items:center;gap:10px;color:var(--muted);margin-top:12px}
+    .loading.show{display:flex}
+    .spinner{width:18px;height:18px;border:3px solid #263142;border-top-color:var(--orange);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .profile{display:none;margin-top:15px;padding:18px;border:1px solid rgba(255,140,0,.25);border-radius:20px;background:linear-gradient(135deg,rgba(255,60,0,.08),var(--panel))}
+    .profile.show{display:block}
+    .profile-head{display:flex;align-items:center;gap:13px}
+    .avatar{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-size:24px;font-weight:800;background:linear-gradient(135deg,var(--red),var(--orange));box-shadow:0 10px 28px rgba(255,60,0,.2)}
+    .profile h3{margin:0;font-size:18px}
+    .uid{color:var(--muted);font-size:11px;margin-top:3px}
+    .tag{margin-left:auto;padding:5px 9px;border-radius:9px;font-size:10px;background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.25);color:var(--green)}
+    .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:15px}
+    .stat{padding:10px 8px;border-radius:12px;background:#0c121c;border:1px solid var(--line);text-align:center}
+    .stat b{display:block;font-size:14px;color:#fff}
+    .stat span{display:block;margin-top:2px;color:var(--muted);font-size:9px}
+
+    .packages{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .pkg{position:relative;padding:18px;border-radius:18px;border:1px solid var(--line);background:var(--panel);transition:.22s}
+    .pkg:hover{transform:translateY(-3px);border-color:rgba(255,140,0,.45)}
+    .pkg.popular{border-color:#ffbd36;box-shadow:0 0 0 1px rgba(255,189,54,.16),0 15px 35px rgba(255,140,0,.1)}
+    .popular-label{position:absolute;right:10px;top:10px;background:#ffbd36;color:#251600;padding:4px 7px;border-radius:7px;font-size:8px;font-weight:800}
+    .pkg h3{margin:0 0 5px;font-size:17px}.likes{font-size:27px;font-weight:800}.likes i{color:var(--orange);font-size:20px}
+    .price{font-size:21px;font-weight:700;margin:7px 0 15px}.price small{font-size:11px;color:var(--muted);font-weight:500}
+    .pkg .btn{width:100%;font-size:12px}
+
+    .features{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
+    .feature{padding:13px 7px;text-align:center;background:#101621;border:1px solid var(--line);border-radius:14px}
+    .feature i{color:var(--orange);margin-bottom:7px}.feature span{display:block;font-size:9px;color:#b7c0ce}
+
+    .contact{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:20px;padding:16px 18px;border-radius:18px;background:linear-gradient(90deg,rgba(0,136,255,.09),rgba(255,60,0,.09));border:1px solid var(--line)}
+    .contact small{color:var(--muted)}.contact strong{display:block}
+    .telegram{background:#168bd5;color:white;border:0;padding:10px 13px;border-radius:12px;font-weight:700}
+
+    .payment-card,.success-card{max-width:600px;margin:25px auto 0;padding:22px;border-radius:24px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow)}
+    .payment-card h2,.success-card h2{text-align:center;margin:0 0 18px}
+    .summary{display:grid;gap:9px;margin-bottom:18px}
+    .row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+    .row span{color:var(--muted)}.row strong{text-align:right}
+    .qr-box{background:#fff;border-radius:18px;padding:15px;width:min(270px,100%);margin:18px auto;text-align:center}
+    .qr-box img{width:100%;aspect-ratio:1;object-fit:contain;display:block}
+    .qr-note{font-size:10px;color:#333;margin-top:7px}
+    .upi{display:flex;gap:8px;align-items:center;padding:11px 12px;background:#0c121c;border:1px solid var(--line);border-radius:13px}
+    .upi code{flex:1;color:#ffbd36;font-family:inherit;font-size:13px}
+    .copy{border:0;background:#202b3c;color:#fff;border-radius:9px;padding:7px 10px;font-size:11px}
+    .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+
+    .success-card{text-align:center;padding:40px 22px}
+    .check{width:88px;height:88px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:rgba(0,255,136,.12);border:2px solid var(--green);color:var(--green);font-size:43px;animation:pop .55s cubic-bezier(.2,1.5,.5,1)}
+    @keyframes pop{0%{transform:scale(.2);opacity:0}100%{transform:scale(1);opacity:1}}
+    .success-card h2{font-size:27px;color:var(--green)}
+    .order{font-size:20px;font-weight:800;letter-spacing:1px;margin:12px 0 6px}
+    .success-sub{color:var(--muted);font-size:12px;margin-bottom:20px}
+    .disclaimer{font-size:10px;line-height:1.5;color:#778294;margin-top:14px;text-align:center}
+
+    .toast{position:fixed;left:50%;bottom:20px;z-index:50;transform:translate(-50%,20px);opacity:0;pointer-events:none;min-width:240px;max-width:90vw;padding:12px 15px;border-radius:13px;background:#171e2a;border:1px solid var(--line);box-shadow:var(--shadow);font-size:12px;text-align:center;transition:.25s}
+    .toast.show{opacity:1;transform:translate(-50%,0)}
+    .toast.good{border-color:rgba(0,255,136,.4)}.toast.bad{border-color:rgba(255,60,0,.45)}
+
+    @media(max-width:800px){
+      .packages{grid-template-columns:repeat(2,1fr)}
+      .stats{grid-template-columns:repeat(3,1fr)}
+      .features{grid-template-columns:repeat(3,1fr)}
+    }
+    @media(max-width:500px){
+      .app{padding:10px 11px 35px}.hero{padding:28px 18px;border-radius:22px}
+      .search-wrap{flex-direction:column}.search-wrap .btn{width:100%}
+      .packages{grid-template-columns:1fr 1fr;gap:9px}.pkg{padding:14px}.likes{font-size:22px}.price{font-size:18px}
+      .contact{align-items:flex-start;flex-direction:column}.telegram{width:100%}
+      .features{grid-template-columns:repeat(2,1fr)}.feature{padding:12px 5px}
+      .stats{grid-template-columns:repeat(2,1fr)}.tag{align-self:flex-start}
+    }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <div class="topbar">
+    <button id="backBtn" class="back-btn" aria-label="Back"><i class="fa-solid fa-arrow-left"></i></button>
+  </div>
+
+  <!-- HOME -->
+  <section id="homePage" class="page active">
+    <div class="hero">
+      <h1>TUFANCODEX <span class="fire">🔥</span></h1>
+      <p>Free Fire player lookup & service order panel.</p>
+      <span class="badge"><i class="fa-solid fa-shield-halved"></i> 100% SAFE & FAST</span>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><h2>Region</h2><span class="hint">Select server</span></div>
+      <div id="regions" class="chips"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><h2>Find Player</h2><span class="hint">Minimum 5 digits</span></div>
+      <div class="search-wrap">
+        <input id="uidInput" inputmode="numeric" maxlength="20" placeholder="Enter Free Fire UID">
+        <button id="searchBtn" class="btn btn-fire"><i class="fa-solid fa-magnifying-glass"></i> SEARCH</button>
+      </div>
+      <div id="loading" class="loading"><span class="spinner"></span> Fetching player profile...</div>
+
+      <div id="profile" class="profile">
+        <div class="profile-head">
+          <div id="avatar" class="avatar">?</div>
+          <div><h3 id="playerName">—</h3><div id="playerUid" class="uid">UID: —</div></div>
+          <span id="regionTag" class="tag">IND</span>
+        </div>
+        <div class="stats">
+          <div class="stat"><b id="level">—</b><span>LEVEL</span></div>
+          <div class="stat"><b id="brRank">—</b><span>BR RANK</span></div>
+          <div class="stat"><b id="csRank">—</b><span>CS RANK</span></div>
+          <div class="stat"><b id="season">—</b><span>SEASON</span></div>
+          <div class="stat"><b id="likes">—</b><span>LIKES</span></div>
+          <div class="stat"><b id="apiRegion">—</b><span>REGION</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><h2>Like Packages</h2><span class="hint">Choose a package</span></div>
+      <div id="packages" class="packages"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title"><h2>Why TUFANCODEX?</h2></div>
+      <div class="features">
+        <div class="feature"><i class="fa-solid fa-bolt"></i><span>Fast Delivery</span></div>
+        <div class="feature"><i class="fa-solid fa-shield-halved"></i><span>100% Safe</span></div>
+        <div class="feature"><i class="fa-solid fa-heart"></i><span>Real Likes</span></div>
+        <div class="feature"><i class="fa-solid fa-ban"></i><span>No Change</span></div>
+        <div class="feature"><i class="fa-solid fa-globe"></i><span>All Servers</span></div>
+        <div class="feature"><i class="fa-solid fa-headset"></i><span>24x7 Support</span></div>
+      </div>
+    </div>
+
+    <div class="contact">
+      <div><small>Need help?</small><strong>@TUFANCODEX</strong></div>
+      <button class="telegram" onclick="openTelegram()"><i class="fa-brands fa-telegram"></i> Telegram</button>
+    </div>
+  </section>
+
+  <!-- PAYMENT -->
+  <section id="paymentPage" class="page">
+    <div class="payment-card">
+      <h2><i class="fa-solid fa-credit-card" style="color:var(--orange)"></i> Payment</h2>
+      <div class="summary">
+        <div class="row"><span>Player UID</span><strong id="payUid">—</strong></div>
+        <div class="row"><span>Name</span><strong id="payName">—</strong></div>
+        <div class="row"><span>Package</span><strong id="payPackage">—</strong></div>
+        <div class="row"><span>Total</span><strong id="payAmount" style="color:#ffbd36">—</strong></div>
+      </div>
+
+      <div class="qr-box">
+        <img id="qrImage" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAZoAAAGaAQAAAAAefbjOAAADCElEQVR4nO2cQY6jMBBFf42RsjRSH2COYm426iP1DcxR5gAt4WUkoz8LVxEyGWnUSjdJQ7FAkPAUI0q/vstFhPjwNv74OAM45JBDDjnkkEP7hES3Dhj7WYDSAcAsuit2wfCQ4Tm0PZRIkhMAlBNliGdpR9IHAggkSV5D2w3Poe2hogIgQzvVsGBuagE0BXnU8BzaDOpuP5qFQAVRXghgFqS3T/glh74plFjVVgyxQoZIMn/JLzn01NDy4EfpgDQF8lVELsFAsj5ueA5tBmHtGBGINP1rZxckksxPfk8O3QM1H7EqZY8/z2LHs2DsA3h1wabDc2hzSDVCVSCQOZLkFNjSRJoAnZbaFNQ1YtfQVUREau0hI9C+rWorNEo8InYOQR8ywk0w5MjmI5hjbULhEbF/yDSiPWvTgxwrmC2JAHbqznL/0DLXUI1AouoBEpckEmvLH64R+4fWGrE8eAuLYMWpaKserhG7hxYfYaeLZ9BShKUTZriPOAKkD7kVJKP6iGYcmkZE2g4eEUeALCImO81LhoDNNezII+II0EojLhbCEkbFatZx2Twi9gzZXOPiHa1ceSlJqVDANeII0Gqly2oPtDho3kJnIp41DgItPiJcL4Bi7Sy55A+PiINA2kHXPMMsQGuWqZBf09w6LvW6hwzPoQ2hVVedpN8nCuJ71xrqRgE49pMGQ5pmWxR/8nty6B5oWfsMZhfMaJqPMDMBwGuWB4BWGkGUl8qxn8Bx6CrH/h1EOVFQBEhv/fbDc2hzaOmhUj2QSwcdSgdJ+SxIGRDE2nnW2D/UIsL66EIlSg+mqRcgTgBKD6C81DX05Pfk0CdAyUrZ2pOPQOaiLfpqJmzC8V3uyaG7fETpYS/qBAJlFiQCMkqgjAIA8SyeNQ4IjdJBBgB8lQ4kz6Iro+VEGR49PIe+Glp33q7ezYjVeqiitUZkK2/77HPXkGWNSAAFIAoAlM4mo8OJQJwgQGf28snvyaF7oNt3usxjrjolFvFwjdg/JPz/NX9v/s9kDjnkkEMOOeQQAPwBxJrAw8EIFK0AAAAASUVORK5CYII=" alt="UPI QR Code">
+        <div class="qr-note">Scan with any supported UPI app</div>
+      </div>
+
+      <div class="upi">
+        <code id="upiId">abhiff132@slc</code>
+        <button id="copyBtn" class="copy"><i class="fa-regular fa-copy"></i> COPY</button>
+      </div>
+
+      <div class="actions">
+        <button id="paidBtn" class="btn btn-green"><i class="fa-solid fa-check"></i> I HAVE PAID</button>
+        <button id="cancelBtn" class="btn btn-dark"><i class="fa-solid fa-xmark"></i> CANCEL</button>
+      </div>
+      <div class="disclaimer">
+        Demo checkout: this page records a local order confirmation only. It does not connect to or modify Free Fire's servers.
+      </div>
+    </div>
+  </section>
+
+  <!-- SUCCESS -->
+  <section id="successPage" class="page">
+    <div class="success-card">
+      <div class="check"><i class="fa-solid fa-check"></i></div>
+      <h2>ORDER PLACED!</h2>
+      <div id="orderId" class="order">#TFC00000</div>
+      <div id="successText" class="success-sub">Your order has been recorded.</div>
+      <button id="homeBtn" class="btn btn-fire"><i class="fa-solid fa-house"></i> BACK TO HOME</button>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const API_BASE = "https://jexarcodexinfoff.vercel.app/player-info?uid=";
+  const UPI_ID = "abhiff132@slc";
+
+  const regions = ["IND","BD","SG","BR","EU","NA","MENA","TH","ID","TW"];
+  const packages = [
+    {likes:500, price:700, usd:7},
+    {likes:1000, price:1400, usd:14, popular:true},
+    {likes:1500, price:2000, usd:20},
+    {likes:2000, price:2500, usd:25}
+  ];
+
+  const $ = id => document.getElementById(id);
+  let selectedRegion = localStorage.getItem("tfc_region") || "IND";
+  let currentPlayer = null;
+  let currentPackage = null;
+  let historyStack = ["home"];
+
+  function sound(type){
+    try{
+      const C = window.AudioContext || window.webkitAudioContext;
+      if(!C) return;
+      const ctx = new C(), osc = ctx.createOscillator(), gain = ctx.createGain();
+      const now = ctx.currentTime;
+      const freq = type === "error" ? 180 : type === "success" ? 660 : type === "search" ? 420 : 520;
+      osc.frequency.setValueAtTime(freq, now);
+      osc.type = "sine";
+      gain.gain.setValueAtTime(.0001, now);
+      gain.gain.exponentialRampToValueAtTime(.07, now+.015);
+      gain.gain.exponentialRampToValueAtTime(.0001, now+.14);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(now); osc.stop(now+.15);
+    }catch(e){}
+  }
+
+  function toast(msg, kind=""){
+    const el = $("toast");
+    el.textContent = msg;
+    el.className = "toast show " + kind;
+    clearTimeout(window.__toast);
+    window.__toast = setTimeout(() => el.className = "toast", 2500);
+  }
+
+  function renderRegions(){
+    $("regions").innerHTML = regions.map(r =>
+      `<button class="chip ${r===selectedRegion?"active":""}" data-region="${r}">${r}</button>`
+    ).join("");
+    document.querySelectorAll(".chip").forEach(btn => btn.onclick = () => {
+      selectedRegion = btn.dataset.region;
+      localStorage.setItem("tfc_region", selectedRegion);
+      renderRegions();
+      sound("click");
+      toast("Region selected: " + selectedRegion, "good");
+    });
+  }
+
+  function renderPackages(){
+    $("packages").innerHTML = packages.map((p,i) => `
+      <article class="pkg ${p.popular?"popular":""}">
+        ${p.popular ? '<span class="popular-label">POPULAR</span>' : ''}
+        <h3>${p.likes.toLocaleString()} <i class="fa-solid fa-heart"></i></h3>
+        <div class="likes">Likes</div>
+        <div class="price">₹${p.price.toLocaleString()} <small>/ $${p.usd}</small></div>
+        <button class="btn btn-fire" onclick="selectPackage(${i})">ORDER NOW</button>
+      </article>
+    `).join("");
+  }
+
+  window.selectPackage = function(index){
+    if(!currentPlayer){
+      toast("Search a player UID first.", "bad");
+      sound("error");
+      $("uidInput").focus();
+      return;
+    }
+    currentPackage = packages[index];
+    $("payUid").textContent = currentPlayer.uid;
+    $("payName").textContent = currentPlayer.nickname || "Unknown";
+    $("payPackage").textContent = currentPackage.likes.toLocaleString() + " Likes";
+    $("payAmount").textContent = "₹" + currentPackage.price.toLocaleString() + " ($" + currentPackage.usd + ")";
+    showPage("payment");
+    sound("click");
+  };
+
+  function normalize(v){
+    if(v === undefined || v === null || v === "") return "—";
+    return String(v);
+  }
+
+  function pick(obj, paths){
+    for(const path of paths){
+      let v = obj;
+      for(const key of path.split(".")){
+        if(v == null) break;
+        v = v[key];
+      }
+      if(v !== undefined && v !== null && v !== "") return v;
+    }
+    return "—";
+  }
+
+  async function searchPlayer(){
+    const uid = $("uidInput").value.trim();
+    if(!/^\d{5,20}$/.test(uid)){
+      toast("Enter a valid UID with at least 5 digits.", "bad");
+      sound("error");
+      return;
+    }
+
+    $("loading").classList.add("show");
+    $("profile").classList.remove("show");
+    sound("search");
+
+    try{
+      const res = await fetch(API_BASE + encodeURIComponent(uid), {headers:{Accept:"application/json"}});
+      if(!res.ok) throw new Error("API " + res.status);
+      const raw = await res.json();
+      const data = raw.data || raw.result || raw.playerInfo || raw;
+
+      const player = {
+        uid,
+        nickname: pick(data, ["nickname","name","basicInfo.nickname","player.nickname"]),
+        level: pick(data, ["level","basicInfo.level","player.level"]),
+        brRank: pick(data, ["rank","brRank","basicInfo.rank","player.rank"]),
+        csRank: pick(data, ["csRank","cs_rank","basicInfo.csRank","player.csRank"]),
+        season: pick(data, ["seasonId","season","basicInfo.seasonId","player.seasonId"]),
+        likes: pick(data, ["liked","likes","likeCount","basicInfo.liked","basicInfo.likes"]),
+        region: pick(data, ["region","basicInfo.region","player.region"])
+      };
+
+      if(player.nickname === "—" && player.level === "—" && player.likes === "—"){
+        throw new Error("Player not found");
+      }
+
+      currentPlayer = player;
+      $("avatar").textContent = (player.nickname !== "—" ? player.nickname.charAt(0) : "?").toUpperCase();
+      $("playerName").textContent = normalize(player.nickname);
+      $("playerUid").textContent = "UID: " + uid;
+      $("regionTag").textContent = normalize(player.region);
+      $("level").textContent = normalize(player.level);
+      $("brRank").textContent = normalize(player.brRank);
+      $("csRank").textContent = normalize(player.csRank);
+      $("season").textContent = normalize(player.season);
+      $("likes").textContent = normalize(player.likes);
+      $("apiRegion").textContent = normalize(player.region);
+      $("profile").classList.add("show");
+
+      localStorage.setItem("tfc_last_uid", uid);
+      const liked = JSON.parse(localStorage.getItem("tfc_liked_uids") || "[]");
+      if(!liked.includes(uid)){ liked.push(uid); localStorage.setItem("tfc_liked_uids", JSON.stringify(liked)); }
+
+      toast("Player found: " + normalize(player.nickname), "good");
+      sound("success");
+    }catch(err){
+      currentPlayer = null;
+      $("profile").classList.remove("show");
+      toast("Player not found. Check UID/API connection.", "bad");
+      sound("error");
+      console.error(err);
+    }finally{
+      $("loading").classList.remove("show");
+    }
+  }
+
+  function generateQR(){
+    const img = $("qrImage");
+    if(img.dataset.fallback) return;
+    img.dataset.fallback = "1";
+    const upiUrl = "upi://pay?pa=" + encodeURIComponent(UPI_ID) +
+      "&pn=" + encodeURIComponent("TUFANCODEX") + "&cu=INR";
+    img.src = "https://api.qrserver.com/v1/create-qr-code/?size=420x420&margin=10&data=" + encodeURIComponent(upiUrl);
+    toast("qr.png not found — using QR fallback.", "good");
+  }
+
+  function copyUPI(){
+    navigator.clipboard?.writeText(UPI_ID).then(() => {
+      toast("UPI ID copied: " + UPI_ID, "good"); sound("success");
+    }).catch(() => toast("Copy failed. Long-press the UPI ID.", "bad"));
+  }
+
+  function orderId(){
+    return "#TFC" + Math.floor(10000 + Math.random()*90000);
+  }
+
+  function showPage(name, push=true){
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    $(name + "Page").classList.add("active");
+    $("backBtn").classList.toggle("show", name !== "home");
+    if(push && historyStack[historyStack.length-1] !== name) historyStack.push(name);
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+
+  function goBack(){
+    if(historyStack.length > 1){
+      historyStack.pop();
+      showPage(historyStack[historyStack.length-1], false);
+    }else{
+      showPage("home", false);
+    }
+  }
+
+  $("searchBtn").onclick = searchPlayer;
+  $("uidInput").addEventListener("keydown", e => { if(e.key === "Enter") searchPlayer(); });
+  $("copyBtn").onclick = copyUPI;
+  $("cancelBtn").onclick = () => { historyStack = ["home"]; showPage("home", false); sound("click"); };
+  $("homeBtn").onclick = () => { historyStack = ["home"]; showPage("home", false); sound("click"); };
+  $("backBtn").onclick = goBack;
+
+  $("paidBtn").onclick = () => {
+    if(!currentPlayer || !currentPackage){
+      toast("Order details are missing.", "bad"); sound("error"); return;
+    }
+    const id = orderId();
+    const order = {
+      id, uid: currentPlayer.uid, name: currentPlayer.nickname,
+      package: currentPackage.likes, amount: currentPackage.price,
+      createdAt: new Date().toISOString()
+    };
+    localStorage.setItem("tfc_last_order", JSON.stringify(order));
+    $("orderId").textContent = id;
+    $("successText").textContent = `${currentPackage.likes.toLocaleString()}-Like package recorded for ${currentPlayer.nickname}.`;
+    showPage("success");
+    sound("success");
+  };
+
+  $("qrImage").addEventListener("error", generateQR);
+
+  window.addEventListener("popstate", () => goBack());
+  // A browser back press should be handled by our page stack.
+  history.pushState({tfc:true}, "");
+  window.addEventListener("beforeunload", () => {});
+
+  window.openTelegram = function(){
+    window.open("https://t.me/TUFANCODEX", "_blank", "noopener,noreferrer");
+  };
+
+  renderRegions();
+  renderPackages();
+
+  const last = localStorage.getItem("tfc_last_uid");
+  if(last) $("uidInput").value = last;
+})();
+</script>
+</body>
+</html>
